@@ -1,0 +1,40 @@
+{
+  "polls": [
+    {
+      "id": 1,
+      "question": "The question will go here?"
+    }
+  ],
+  "options": [
+    {
+      "id": 1,
+      "text": "Yes",
+      "count": 0,
+      "pollId": 1
+    },
+    {
+      "id": 2,
+      "text": "No",
+      "count": 0,
+      "pollId": 1
+    },
+    {
+      "id": 3,
+      "text": "Undecided",
+      "count": 0,
+      "pollId": 1
+    },
+    {
+      "text": "New Option",
+      "count": 1,
+      "pollId": 1,
+      "id": 4
+    },
+    {
+      "text": "newnew",
+      "count": 1,
+      "pollId": 1,
+      "id": 5
+    }
+  ]
+}
