@@ -9,7 +9,6 @@ function Poll() {
   });
   const dispatch = useDispatch();
   const voteHandler = (id) => {
-    // dispatch({ type: "option" + selectedOption.id });
     dispatch({ type: "vote", optionId: selectedOption.id });
   };
 
@@ -17,7 +16,7 @@ function Poll() {
   return (
     <Card style={{ width: "50%" }}>
       <Card.Body>
-        <div>The question will go here?</div>
+        <div>{poll.question}</div>
         <Dropdown>
           <Dropdown.Toggle variant="success" id="dropdown-basic">
             {selectedOption.text}
