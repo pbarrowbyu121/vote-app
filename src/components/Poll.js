@@ -9,7 +9,8 @@ function Poll() {
   });
   const dispatch = useDispatch();
   const voteHandler = (id) => {
-    dispatch({ type: "option" + selectedOption.id });
+    // dispatch({ type: "option" + selectedOption.id });
+    dispatch({ type: "vote", optionId: selectedOption.id });
   };
 
   const poll = useSelector((state) => state);
