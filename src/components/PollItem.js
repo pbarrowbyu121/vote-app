@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button, Card, Form, Row, Col } from "react-bootstrap";
 import { useDispatch } from "react-redux";
+import Chart from "react-google-charts";
 
 function PollItem({ questionObj }) {
   const [selectedOption, setSelectedOption] = useState("select");
@@ -39,8 +40,18 @@ function PollItem({ questionObj }) {
     setNewOptionText(event.target.value);
   };
 
+  const dataForChart = () => {
+    let data = [["Response", "Votes"]];
+    questionObj.options.forEach((option) => {
+      data.push([option.text, option.count]);
+    });
+    return data;
+  };
+  const chartData = dataForChart();
+
+  console.log("data", chartData);
   return (
-    <Card style={{ width: "50%" }}>
+    <Card style={{ width: "90%" }}>
       <Card.Body>
         <Row>
           <Col>
@@ -89,6 +100,23 @@ function PollItem({ questionObj }) {
               <Col>{totalVotes}</Col>
             </Row>
           </Col>
+          {totalVotes > 0 && (
+            <Col>
+              <Chart
+                width={"300px"}
+                chartType="PieChart"
+                loader={<div>Loading Chart</div>}
+                data={chartData}
+                options={{
+                  title: questionObj.question,
+                  chartArea: {
+                    height: "200px",
+                  },
+                }}
+                rootProps={{ "data-testid": "1" }}
+              />
+            </Col>
+          )}
         </Row>
       </Card.Body>
     </Card>
