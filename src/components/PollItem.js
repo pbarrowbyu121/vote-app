@@ -1,27 +1,37 @@
 import { useState } from "react";
 import { Button, Card, Form, Row, Col } from "react-bootstrap";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 
-function Poll() {
+function PollItem({ questionObj }) {
   const [selectedOption, setSelectedOption] = useState("select");
   const [newOptionText, setNewOptionText] = useState("");
   const dispatch = useDispatch();
-  const poll = useSelector((state) => state);
+
   const nextId =
-    poll.options.reduce((prev, curr) =>
+    questionObj.options.reduce((prev, curr) =>
       prev.id > curr.id ? prev.id : curr.id
     ) + 1;
+
+  const totalVotes = questionObj.options.reduce(
+    (prev, curr) => prev + curr.count,
+    0
+  );
   const voteHandler = (e) => {
     e.preventDefault();
     if (selectedOption === "add-option") {
       dispatch({
         type: "add-option",
         newOption: { id: nextId, text: newOptionText, count: 1 },
+        questionId: questionObj.id,
       });
       setSelectedOption("select");
       setNewOptionText("");
     } else {
-      dispatch({ type: "vote", optionId: selectedOption });
+      dispatch({
+        type: "vote",
+        questionId: questionObj.id,
+        optionId: selectedOption,
+      });
     }
   };
 
@@ -34,7 +44,7 @@ function Poll() {
       <Card.Body>
         <Row>
           <Col>
-            <div>{poll.question}</div>
+            <div>{questionObj.question}</div>
             <Form onSubmit={voteHandler}>
               <Form.Control
                 value={selectedOption}
@@ -44,7 +54,7 @@ function Poll() {
                 }}
               >
                 <option value={"select"}>Select</option>
-                {poll.options.map((option) => (
+                {questionObj.options.map((option) => (
                   <option key={option.id} value={option.id}>
                     {option.text}
                   </option>
@@ -68,7 +78,7 @@ function Poll() {
           </Col>
           <Col>
             <div>Results:</div>
-            {poll.options.map((option) => (
+            {questionObj.options.map((option) => (
               <Row key={option.id}>
                 <Col>{option.text}:</Col>
                 <Col>{option.count}</Col>
@@ -76,7 +86,7 @@ function Poll() {
             ))}
             <Row>
               <Col>Total:</Col>
-              <Col>{poll.totalVotes}</Col>
+              <Col>{totalVotes}</Col>
             </Row>
           </Col>
         </Row>
@@ -85,4 +95,4 @@ function Poll() {
   );
 }
 
-export default Poll;
+export default PollItem;
