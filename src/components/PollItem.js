@@ -13,15 +13,25 @@ function PollItem({ questionObj, optionsList }) {
   const totalVotes = optionsList.reduce((prev, curr) => prev + curr.count, 0);
 
   function addOptionHandler() {
-    addOption({
+    const newOption = {
       text: newOptionText,
       count: 1,
       questionId: questionObj.id,
-    }).then((response) => {
+    };
+
+    // USE THIS FOR REDUX TOOLKIT
+    addOption(newOption).then((response) => {
       getOptions().then((response) => {
-        dispatch(optionsSlice.actions.setOptions({ payload: response || [] }));
+        dispatch(optionsSlice.actions.setOptions(response || []));
       });
     });
+
+    // USE THIS FOR REDUX
+    // addOption(newOption).then((response) => {
+    //   getOptions().then((response) => {
+    //     dispatch({ type: "addOption", options: response });
+    //   });
+    // });
   }
 
   const voteHandler = (e) => {
@@ -33,13 +43,20 @@ function PollItem({ questionObj, optionsList }) {
         ...optionsList.find((option) => option.id === +selectedOption),
       };
       editedOption = { ...editedOption, count: +editedOption.count + 1 };
+
+      // USE THIS FOR REDUX TOOLKIT
       voteOption(editedOption).then((res) =>
         getOptions().then((response) => {
-          dispatch(
-            optionsSlice.actions.setOptions({ payload: response || [] })
-          );
+          dispatch(optionsSlice.actions.setOptions(response || []));
         })
       );
+
+      // USE THIS FOR REDUX
+      // voteOption(editedOption).then((res) =>
+      //   getOptions().then((response) => {
+      //     dispatch({ type: "addOption", options: response });
+      //   })
+      // );
     }
     setSelectedOption("select");
   };

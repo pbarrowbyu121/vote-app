@@ -5,7 +5,7 @@ const optionsSlice = createSlice({
   initialState: { options: [] },
   reducers: {
     setOptions(state, action) {
-      state.options = action.payload.payload;
+      state.options = action.payload;
     },
   },
 });

@@ -11,17 +11,30 @@ import optionsSlice from "./store/options-slice";
 
 function App() {
   const dispatch = useDispatch();
+  // USE THIS FOR REDUX TOOLKIT
   useEffect(() => {
     getQuestions().then((response) => {
-      dispatch(
-        questionsSlice.actions.setQuestions({ payload: response || [] })
-      );
+      dispatch(questionsSlice.actions.setQuestions(response || []));
     });
 
     getOptions().then((response) => {
-      dispatch(optionsSlice.actions.setOptions({ payload: response || [] }));
+      dispatch(optionsSlice.actions.setOptions(response || []));
     });
   }, [dispatch]);
+
+  //
+  // USE THIS FOR REDUX
+  // useEffect(() => {
+  //   getQuestions().then((response) => {
+  //     dispatch(
+  //       { type: "setQuestions", questions: response || [] }
+  //     );
+  //   });
+
+  //   getOptions().then((response) => {
+  //     dispatch({ type: "setOptions", options: response || [] });
+  //   });
+  // }, [dispatch]);
 
   return (
     <div>
