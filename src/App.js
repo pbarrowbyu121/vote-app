@@ -1,18 +1,46 @@
-// import logo from './logo.svg';
 import "./App.css";
 import PollList from "./components/PollList";
 import AddPoll from "./components/AddPoll";
 import "bootstrap/dist/css/bootstrap.css";
-import { Provider } from "react-redux";
-import store from "./store/index";
-import { Container } from "react-bootstrap";
+
+import { useEffect } from "react";
+import { getQuestions, getOptions } from "./helpers";
+import questionsSlice from "./store/questions-slice";
+import { useDispatch } from "react-redux";
+import optionsSlice from "./store/options-slice";
 
 function App() {
+  const dispatch = useDispatch();
+  // USE THIS FOR REDUX TOOLKIT
+  useEffect(() => {
+    getQuestions().then((response) => {
+      dispatch(questionsSlice.actions.setQuestions(response || []));
+    });
+
+    getOptions().then((response) => {
+      dispatch(optionsSlice.actions.setOptions(response || []));
+    });
+  }, [dispatch]);
+
+  //
+  // USE THIS FOR REDUX
+  // useEffect(() => {
+  //   getQuestions().then((response) => {
+  //     dispatch(
+  //       { type: "setQuestions", questions: response || [] }
+  //     );
+  //   });
+
+  //   getOptions().then((response) => {
+  //     dispatch({ type: "setOptions", options: response || [] });
+  //   });
+  // }, [dispatch]);
+
   return (
-    <Provider store={store}>
+    <div>
       <PollList />
       <AddPoll />
-    </Provider>
+    </div>
   );
 }
 

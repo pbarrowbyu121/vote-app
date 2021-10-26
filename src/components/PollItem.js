@@ -2,38 +2,63 @@ import { useState } from "react";
 import { Button, Card, Form, Row, Col } from "react-bootstrap";
 import { useDispatch } from "react-redux";
 import Chart from "react-google-charts";
+import { voteOption, getOptions, addOption } from "../helpers";
+import optionsSlice from "../store/options-slice";
 
-function PollItem({ questionObj }) {
+function PollItem({ questionObj, optionsList }) {
   const [selectedOption, setSelectedOption] = useState("select");
   const [newOptionText, setNewOptionText] = useState("");
   const dispatch = useDispatch();
 
-  const nextId =
-    questionObj.options.reduce((prev, curr) =>
-      prev.id > curr.id ? prev.id : curr.id
-    ) + 1;
+  const totalVotes = optionsList.reduce((prev, curr) => prev + curr.count, 0);
 
-  const totalVotes = questionObj.options.reduce(
-    (prev, curr) => prev + curr.count,
-    0
-  );
+  function addOptionHandler() {
+    const newOption = {
+      text: newOptionText,
+      count: 1,
+      questionId: questionObj.id,
+    };
+
+    // USE THIS FOR REDUX TOOLKIT
+    addOption(newOption).then((response) => {
+      getOptions().then((response) => {
+        dispatch(optionsSlice.actions.setOptions(response || []));
+      });
+    });
+
+    // USE THIS FOR REDUX
+    // addOption(newOption).then((response) => {
+    //   getOptions().then((response) => {
+    //     dispatch({ type: "addOption", options: response });
+    //   });
+    // });
+  }
+
   const voteHandler = (e) => {
     e.preventDefault();
     if (selectedOption === "add-option") {
-      dispatch({
-        type: "add-option",
-        newOption: { id: nextId, text: newOptionText, count: 1 },
-        questionId: questionObj.id,
-      });
-      setSelectedOption("select");
-      setNewOptionText("");
+      addOptionHandler();
     } else {
-      dispatch({
-        type: "vote",
-        questionId: questionObj.id,
-        optionId: selectedOption,
-      });
+      let editedOption = {
+        ...optionsList.find((option) => option.id === +selectedOption),
+      };
+      editedOption = { ...editedOption, count: +editedOption.count + 1 };
+
+      // USE THIS FOR REDUX TOOLKIT
+      voteOption(editedOption).then((res) =>
+        getOptions().then((response) => {
+          dispatch(optionsSlice.actions.setOptions(response || []));
+        })
+      );
+
+      // USE THIS FOR REDUX
+      // voteOption(editedOption).then((res) =>
+      //   getOptions().then((response) => {
+      //     dispatch({ type: "addOption", options: response });
+      //   })
+      // );
     }
+    setSelectedOption("select");
   };
 
   const addOptionChange = (event) => {
@@ -42,20 +67,19 @@ function PollItem({ questionObj }) {
 
   const dataForChart = () => {
     let data = [["Response", "Votes"]];
-    questionObj.options.forEach((option) => {
+    optionsList.forEach((option) => {
       data.push([option.text, option.count]);
     });
     return data;
   };
   const chartData = dataForChart();
 
-  console.log("data", chartData);
   return (
     <Card style={{ width: "90%" }}>
       <Card.Body>
         <Row>
           <Col>
-            <div>{questionObj.question}</div>
+            <div>{questionObj.text}</div>
             <Form onSubmit={voteHandler}>
               <Form.Control
                 value={selectedOption}
@@ -65,7 +89,7 @@ function PollItem({ questionObj }) {
                 }}
               >
                 <option value={"select"}>Select</option>
-                {questionObj.options.map((option) => (
+                {optionsList.map((option) => (
                   <option key={option.id} value={option.id}>
                     {option.text}
                   </option>
@@ -89,7 +113,7 @@ function PollItem({ questionObj }) {
           </Col>
           <Col>
             <div>Results:</div>
-            {questionObj.options.map((option) => (
+            {optionsList.map((option) => (
               <Row key={option.id}>
                 <Col>{option.text}:</Col>
                 <Col>{option.count}</Col>
@@ -108,7 +132,7 @@ function PollItem({ questionObj }) {
                 loader={<div>Loading Chart</div>}
                 data={chartData}
                 options={{
-                  title: questionObj.question,
+                  title: questionObj.text,
                   chartArea: {
                     height: "200px",
                   },

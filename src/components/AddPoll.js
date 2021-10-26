@@ -2,42 +2,67 @@ import { Button, Card, Form, Row, Col } from "react-bootstrap";
 import { useState } from "react";
 import { Container } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
+import { v4 as uuidv4 } from "uuid";
+import { addQuestion, addOption, getOptions, getQuestions } from "../helpers";
+
+// USE THESE FOR REDUX TOOLKIT
+import optionsSlice from "../store/options-slice";
+import questionsSlice from "../store/questions-slice";
 
 function AddPoll() {
   const [newQuestion, setNewQuestion] = useState("");
   const [newOption, setNewOption] = useState("");
-  const [answerOptions, setAnswerOptions] = useState([]);
-  //   let newOptions = [];
+  const [questionId, setNewQuestionId] = useState(uuidv4());
+
+  // USE THIS FOR REDUX TOOLKIT
+  const optionsList = useSelector((state) => state.options.options).filter(
+    (option) => option.questionId === questionId
+  );
+
+  // USE THIS FOR REDUX
+  // const optionsList = useSelector((state) => state.options).filter(
+  //   (option) => option.questionId === questionId
+  // );
   const dispatch = useDispatch();
-  const state = useSelector((state) => state);
 
   function submitQuestionHandler(event) {
     event.preventDefault();
-    const nextId =
-      state.questions.reduce(
-        (prev, curr) => (prev.id > curr.id ? prev.id : curr.id),
-        0
-      ) + 1;
     const newQuestionObj = {
-      id: nextId,
-      question: newQuestion,
-      options: answerOptions,
+      id: questionId,
+      text: newQuestion,
     };
-    dispatch({
-      type: "add-question",
-      newQuestion: newQuestionObj,
-    });
+    addQuestion(newQuestionObj).then(
+      (response) =>
+        // USE THIS FOR REDUX TOOLKIT
+        getQuestions().then((response) => {
+          dispatch(questionsSlice.actions.setQuestions(response || []));
+        })
+      // USE THIS FOR REDUX
+      // getQuestions().then((response) => {
+      //   dispatch({ type: "setQuestions", questions: response });
+      // })
+    );
     setNewQuestion("");
-    setAnswerOptions([]);
+    setNewQuestionId(uuidv4());
   }
 
   function addOptionHandler(event) {
     event.preventDefault();
-    setAnswerOptions([
-      ...answerOptions,
-      { id: answerOptions.length + 1, text: newOption, count: 0 },
-    ]);
-    setNewOption("");
+    // USE THIS FOR REDUX TOOLKIT
+    addOption({ text: newOption, count: 0, questionId }).then((response) => {
+      setNewOption("");
+      getOptions().then((response) => {
+        dispatch(optionsSlice.actions.setOptions(response || []));
+      });
+    });
+
+    // USE THIS FOR REDUX
+    // addOption({ text: newOption, count: 0, questionId }).then((response) => {
+    //   setNewOption("");
+    //   getOptions().then((response) => {
+    //     dispatch({ type: "setOptions", options: response });
+    //   });
+    // });
   }
 
   return (
@@ -50,7 +75,7 @@ function AddPoll() {
               onChange={(event) => setNewQuestion(event.target.value)}
               value={newQuestion}
             />
-            {answerOptions.map((option) => (
+            {optionsList.map((option) => (
               <div key={option.id}>{option.text}</div>
             ))}
             <Row>
